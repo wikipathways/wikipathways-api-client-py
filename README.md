@@ -1,6 +1,12 @@
-Python API client for WikiPathways webservices. In development.
+# Python API client for WikiPathways webservices.
 
-Currently, the following functions still need to be implemented:
+Currently in development; the API for this library is unstable.
+
+## TODO
+
+* Add tests
+* Make into a package and publish on PyPI so it can be installed with ```pip```
+* The following webservice API calls still need to be implemented; pull requests welcome:
 
 * ~~listOrganisms~~
 * ~~listPathways~~
