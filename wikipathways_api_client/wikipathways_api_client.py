@@ -11,9 +11,9 @@ class WikipathwaysApiClient(object):
         'id': 'identifier',
         'pwId': 'identifier',
         'revision': 'version',
-        'graphId': 'element_identifiers',
+        'graphId': 'elementIdentifiers',
         'color': 'colors',
-        'fileType': 'FileFormat',
+        'fileType': 'fileFormat',
         'species': 'organism',
         'url': 'webPage'
     }
