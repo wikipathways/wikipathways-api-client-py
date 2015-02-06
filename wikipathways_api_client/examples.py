@@ -38,7 +38,7 @@ def main():
     file = wikipathways_api_client_instance.get_pathway_as({
         'identifier': 'WP2062',
         'version': 0,
-        'FileFormat': 'gpml'
+        'fileFormat': 'gpml'
     })
     print file
 
