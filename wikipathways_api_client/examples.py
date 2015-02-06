@@ -17,35 +17,45 @@ def main():
 
     '''
     # Get colored pathway
-    #fileType = 'png' ### svg, pdf
-    file_format = 'svg' ### png, pdf
-    wikipathways_id = "WP2062"
-
-    element_identifiers=["ffffff90","ffffffe5"]
-    colors = ["0000ff","0000ff"]
-
     file = wikipathways_api_client_instance.get_colored_pathway({
-        'identifier': wikipathways_id,
+        'identifier': 'WP2062',
         'version': 0,
-        'element_identifiers': element_identifiers,
-        'colors': colors,
-        'FileFormat': file_format
+        'elementIdentifiers': ["ffffff90","ffffffe5"],
+        'colors': ["0000ff","0000ff"],
+        'fileFormat': 'svg' ### png, pdf
     })
     print file
     '''
 
+    '''
     # Get pathway with desired file format
     file = wikipathways_api_client_instance.get_pathway_as({
         'identifier': 'WP2062',
         'version': 0,
-        'FileFormat': 'gpml'
+        'fileFormat': 'gpml'
     })
     print file
+    '''
 
     '''
     pathways_all = wikipathways_api_client_instance.list_pathways(organism = 'Homo sapiens')
     print pathways_all
     '''
+
+    '''
+    # findPathwaysByText
+    pathways_by_text = wikipathways_api_client_instance.find_pathways_by_text({
+            'query': 'apoptosis'
+        })
+    print pathways_by_text 
+    '''
+
+    # findPathwaysByXref
+    pathways_by_xref = wikipathways_api_client_instance.find_pathways_by_xref({
+        'systemCodes': 'X',
+        'identifiers': '201746_at'
+    })
+    print pathways_by_xref 
 
 if __name__ == '__main__':
     main()
