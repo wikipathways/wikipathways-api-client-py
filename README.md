@@ -18,7 +18,7 @@ Currently, the following functions still need to be implemented:
 * removeCurationTag
 * getCurationTags
 * getCurationTagsByName
-* getColoredPathway
+* ~~getColoredPathway~~
 * getXrefList
 * findPathwaysByLiterature
 * getOntologyTermsByPathway
