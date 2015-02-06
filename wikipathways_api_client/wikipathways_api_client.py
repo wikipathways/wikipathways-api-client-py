@@ -20,7 +20,7 @@ class WikipathwaysApiClient(object):
 
     def __init__(self, base_iri=None):
         if base_iri is None:
-            base_iri = 'http://www.wikipathways.org/wpi/webservicetest/'
+            base_iri = 'http://webservice.wikipathways.org/'
         self.base_iri = base_iri
 
         # define namespaces
@@ -68,7 +68,7 @@ class WikipathwaysApiClient(object):
         #kwargs.setdefault('allow_redirects', True)
 
         request_params = {'pwId' : identifier}
-        response = requests.get(self.base_iri + '?method=getPathwayInfo&format=xml', params=request_params)
+        response = requests.get(self.base_iri + 'getPathwayInfo', params=request_params)
         dom = ET.fromstring(response.text)
 
         info_api_terms = {}
