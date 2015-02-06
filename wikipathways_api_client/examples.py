@@ -27,9 +27,9 @@ def main():
     file = wikipathways_api_client_instance.get_colored_pathway({
         'identifier': wikipathways_id,
         'version': 0,
-        'element_identifiers': element_identifiers,
+        'elementIdentifiers': element_identifiers,
         'colors': colors,
-        'FileFormat': file_format
+        'fileFormat': file_format
     })
     print file
     '''
