@@ -4,10 +4,10 @@ def main():
     wikipathways_api_client_instance = WikipathwaysApiClient()
 
     '''
-    '''
     # Get pathway info
     info = wikipathways_api_client_instance.get_pathway_info('WP274')
     print info
+    '''
 
     '''
     # Get organisms
@@ -17,24 +17,26 @@ def main():
 
     '''
     # Get colored pathway
-    file = wikipathways_api_client_instance.get_colored_pathway({
+    kwargs = {
         'identifier': 'WP2062',
         'version': 0,
-        'elementIdentifiers': ["ffffff90","ffffffe5"],
-        'colors': ["0000ff","0000ff"],
-        'fileFormat': 'svg' ### png, pdf
-    })
+        'element_identifiers': ["ffffff90","ffffffe5"],
+        'colors': ["#0000FF","#0000FF"],
+        'file_format': 'image/svg+xml'
+    }
+    file = wikipathways_api_client_instance.get_colored_pathway(**kwargs)
     print file
     '''
 
-    '''
     # Get pathway with desired file format
-    file = wikipathways_api_client_instance.get_pathway_as({
+    kwargs = {
         'identifier': 'WP2062',
         'version': 0,
-        'fileFormat': 'gpml'
-    })
+        'file_format': 'application/gpml+xml'
+    }
+    file = wikipathways_api_client_instance.get_pathway_as(**kwargs)
     print file
+    '''
     '''
 
     '''

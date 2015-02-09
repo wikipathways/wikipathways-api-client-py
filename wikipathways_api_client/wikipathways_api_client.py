@@ -1,3 +1,4 @@
+import re
 import requests
 import getpass
 from lxml import etree as ET
@@ -18,13 +19,27 @@ class WikipathwaysApiClient(object):
         'ids': 'identifiers',
         'pwId': 'identifier',
         'revision': 'version',
-        'graphId': 'elementIdentifiers',
+        'graphId': 'element_identifiers',
         'color': 'colors',
-        'fileType': 'fileFormat',
+        'fileType': 'file_format',
         'species': 'organism',
-        'url': 'webPage',
-        'codes': 'systemCodes'
+        'url': 'web_page',
+        'codes': 'system_codes'
     }
+
+    
+    filename_extension_to_media_type_mappings = {
+        'svg': 'image/svg+xml',
+        'png': 'image/png',
+        'pdf': 'application/pdf',
+        'gpml': 'application/gpml+xml',
+        'txt': 'text/vnd.genelist+tab-separated-values',
+        'pwf': 'text/vnd.eu.gene+plain',
+        'owl': 'application/vnd.biopax.owl+xml',
+    }
+    filename_extensions = filename_extension_to_media_type_mappings.keys()
+    media_types = filename_extension_to_media_type_mappings.values()
+    media_type_to_filename_extension_mappings = invert_dict(filename_extension_to_media_type_mappings)
 
     english_name_to_iri_mappings = {
             'African malaria mosquito': 'http://identifiers.org/taxonomy/7165',
@@ -57,7 +72,6 @@ class WikipathwaysApiClient(object):
             'western clawed frog': 'http://identifiers.org/taxonomy/8364',
             'maize': 'http://identifiers.org/taxonomy/4577'
     }
-
     iri_to_english_name_mappings = invert_dict(english_name_to_iri_mappings)
 
 
@@ -160,6 +174,15 @@ class WikipathwaysApiClient(object):
                 return organism_dict
 
 
+    def __enrich_pathway(self, pathway):
+        pathway['@id'] = 'http://identifiers.org/wikipathways/' + pathway['identifier']
+
+        if pathway.get('organism') and isinstance(pathway['organism'], basestring):
+            pathway['organism'] = self.__convert_organism_string_to_dict(pathway['organism'])
+
+        return pathway
+
+
     def create_pathway(self):
         ###
         # author: msk (mkutmon@gmail.com)
@@ -185,7 +208,54 @@ class WikipathwaysApiClient(object):
         print re.text
 
 
-    def get_colored_pathway(self, input_params):
+    def get_colored_pathway(self, identifier, element_identifiers, colors, version = '0', file_format = 'svg'):
+        """Sends a GET request. Returns :string:`file` object.
+
+        Args:
+          identifier (str): WikiPathways ID.
+          element_identifiers (list of str): means of identifying one or more elements in a pathway,
+            for example, specify GPML GraphIds as ["ffffff90","ffffffe5"].
+          colors (list of str): one or more hexadecimal number(s), representing the colors to use for
+            the corresponding element_identifier (if the length of the colors list is equal to the
+            length of the element_identifiers list) or the single color to use for all element_identifiers
+            (if the colors list is not equal in length to the element_identifiers list).
+            Example: ["#0000FF","#0000FF"].
+          version (str, optional): The version of the pathway. Defaults to '0', which means latest.
+          file_format (str): IANA media type (http://www.iana.org/assignments/media-types/media-types.xhtml)
+            or filename extension desired for response. Defaults to 'svg'. Examples:
+
+            Media types:
+            * 'image/svg+xml'
+            * 'image/png'
+            * 'application/pdf'
+            Filename extensions:
+            * 'svg'
+            * 'png'
+            * 'pdf'
+        """
+
+        # API does not yet support content-type negotiation, so we need to convert
+        # filename extension to be used as a query parameter.
+        if file_format in self.media_types:
+            file_format = self.media_type_to_filename_extension_mappings[file_format]
+
+        # HTML/CSS defaults use a pound sign before the HEX number, e.g. #FFFFFF.
+        # But the API does not use this, so to make it easier for users, we are
+        # accepting the pound sign in the input args and stripping it here.
+        input_colors = colors
+        colors = []
+        non_letter_number_pattern = re.compile('[^a-zA-Z0-9]+')
+        for input_color in input_colors:
+            color = non_letter_number_pattern.sub('', input_color)
+            colors.append(color)
+
+        input_params = {
+            'identifier': identifier,
+            'version': version,
+            'element_identifiers': element_identifiers,
+            'colors': colors,
+            'file_format': file_format
+        }
         request_params = self.__convert_standard_terms_to_api_terms(input_params)
         response = requests.get(self.base_iri + 'getColoredPathway', params=request_params)
         dom = ET.fromstring(response.text)
@@ -194,7 +264,47 @@ class WikipathwaysApiClient(object):
         return file
 
 
-    def get_pathway_as(self, input_params):
+    def get_pathway_as(self, identifier, version = '0', file_format = 'gpml'):
+        """
+        Sends a GET request. Returns an LXML object for any XML media type
+        and a string for anything else
+
+        Args:
+          identifier (str): WikiPathways ID.
+          version (str, optional): The version of the pathway. Defaults to '0', which means latest.
+          file_format (str): IANA media type (http://www.iana.org/assignments/media-types/media-types.xhtml)
+            or filename extension desired for response. Defaults to 'gpml'.
+            Examples:
+
+            Media types:
+            * 'application/gpml+xml'
+            * 'text/vnd.genelist+tab-separated-values'
+            * 'text/vnd.eu.gene+plain'
+            * 'application/vnd.biopax.owl+xml'
+            * 'image/svg+xml'
+            * 'image/png'
+            * 'application/pdf'
+            Filename extensions:
+            * 'gpml'
+            * 'txt'
+            * 'pwf'
+            * 'owl'
+            * 'svg'
+            * 'png'
+            * 'pdf'
+        """
+
+        # API does not yet support content-type negotiation, so we need to convert
+        # filename extension to be used as a query parameter.
+        if file_format in self.media_types:
+            file_format = self.media_type_to_filename_extension_mappings[file_format]
+
+        input_params = {
+            'identifier': identifier,
+            'version': version,
+            'file_format': file_format
+        }
+
         request_params = self.__convert_standard_terms_to_api_terms(input_params)
         response = requests.get(self.base_iri + 'getPathwayAs', params=request_params)
         dom = ET.fromstring(response.text)
@@ -219,16 +329,14 @@ class WikipathwaysApiClient(object):
         response = requests.get(self.base_iri + 'getPathwayInfo', params=request_params)
         dom = ET.fromstring(response.text)
 
-        info_api_terms = {}
+        pathway_using_api_terms = {}
         for node in dom.findall('ns1:pathwayInfo', self.NAMESPACES):
             for attribute in node:
-                info_api_terms[ET.QName(attribute).localname] = attribute.text
-        info = self.__convert_api_terms_to_standard_terms(info_api_terms)
+                pathway_using_api_terms[ET.QName(attribute).localname] = attribute.text
+        pathway = self.__convert_api_terms_to_standard_terms(pathway_using_api_terms)
+        pathway = self.__enrich_pathway(pathway)
 
-        if info.get('organism') and isinstance(info['organism'], basestring):
-            info['organism'] = self.__convert_organism_string_to_dict(info['organism'])
-
-        return info
+        return pathway
 
 
     def find_pathways_by_text(self, input_params):
@@ -247,8 +355,9 @@ class WikipathwaysApiClient(object):
             pathway_using_api_terms = {}
             for child in node:
                 pathway_using_api_terms[ET.QName(child).localname] = child.text
-                #print pathways_api_terms
+                #print pathways_using_api_terms
             pathway = self.__convert_api_terms_to_standard_terms(pathway_using_api_terms)
+            pathway = self.__enrich_pathway(pathway)
             pathways.append(pathway)
         return pathways
 
@@ -278,6 +387,7 @@ class WikipathwaysApiClient(object):
                         field[ET.QName(fieldChildNode).localname] = fieldChildNode.text
                     pathway_using_api_terms['fields'].append(field)
             pathway = self.__convert_api_terms_to_standard_terms(pathway_using_api_terms)
+            pathway = self.__enrich_pathway(pathway)
             pathways.append(pathway)
         return pathways
 
@@ -325,6 +435,7 @@ class WikipathwaysApiClient(object):
             for child_node in pathway_node:
                 pathway_using_api_terms[ET.QName(child_node).localname] = child_node.text
             pathway = self.__convert_api_terms_to_standard_terms(pathway_using_api_terms)
+            pathway = self.__enrich_pathway(pathway)
             pathways.append(pathway)
 
         return pathways
