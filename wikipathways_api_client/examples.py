@@ -10,10 +10,10 @@ def main():
     '''
 
     '''
+    '''
     # Get organisms
     organisms = wikipathways_api_client_instance.list_organisms()
     print organisms
-    '''
 
     '''
     # Get colored pathway
@@ -50,12 +50,14 @@ def main():
     print pathways_by_text 
     '''
 
+    '''
     # findPathwaysByXref
     pathways_by_xref = wikipathways_api_client_instance.find_pathways_by_xref({
         'systemCodes': 'X',
         'identifiers': '201746_at'
     })
     print pathways_by_xref 
+    '''
 
 if __name__ == '__main__':
     main()

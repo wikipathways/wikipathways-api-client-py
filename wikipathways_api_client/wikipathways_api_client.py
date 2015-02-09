@@ -22,10 +22,46 @@ class WikipathwaysApiClient(object):
         'codes': 'systemCodes'
     }
 
+    latinNameToIriMappings = {
+            'Anopheles gambiae': 'http://identifiers.org/taxonomy/7165',
+            'Arabidopsis thaliana': 'http://identifiers.org/taxonomy/3702',
+            'Aspergillus niger': 'http://identifiers.org/taxonomy/5061',
+            'Bacillus subtilis': 'http://identifiers.org/taxonomy/1423',
+            'Bos taurus': 'http://identifiers.org/taxonomy/9913',
+            'Caenorhabditis elegans': 'http://identifiers.org/taxonomy/6239',
+            'Canis familiaris': 'http://identifiers.org/taxonomy/9615',
+            'Ciona intestinalis': 'http://identifiers.org/taxonomy/7719',
+            'Danio rerio': 'http://identifiers.org/taxonomy/7955',
+            'Drosophila melanogaster': 'http://identifiers.org/taxonomy/7227',
+            'Escherichia coli': 'http://identifiers.org/taxonomy/562',
+            'Equus caballus': 'http://identifiers.org/taxonomy/9796',
+            'Gallus gallus': 'http://identifiers.org/taxonomy/9031',
+            'Gibberella zeae': 'http://identifiers.org/taxonomy/5518',
+            'Glycine max': 'http://identifiers.org/taxonomy/3847',
+            'Homo sapiens': 'http://identifiers.org/taxonomy/9606',
+            'Hordeum vulgare': 'http://identifiers.org/taxonomy/4513',
+            'Macaca mulatta': 'http://identifiers.org/taxonomy/9544',
+            'Mus musculus': 'http://identifiers.org/taxonomy/10090',
+            'Mycobacterium tuberculosis': 'http://identifiers.org/taxonomy/1773',
+            'Ornithorhynchus anatinus': 'http://identifiers.org/taxonomy/9258',
+            'Oryza indica': 'http://identifiers.org/taxonomy/39946',
+            'Oryza sativa': 'http://identifiers.org/taxonomy/4530',
+            'Oryza sativa Indica Group': 'http://identifiers.org/taxonomy/39946',
+            'Populus trichocarpa': 'http://identifiers.org/taxonomy/3694',
+            'Pan troglodytes': 'http://identifiers.org/taxonomy/9598',
+            'Rattus norvegicus': 'http://identifiers.org/taxonomy/10116',
+            'Saccharomyces cerevisiae': 'http://identifiers.org/taxonomy/4932',
+            'Solanum lycopersicum': 'http://identifiers.org/taxonomy/4081',
+            'Sus scrofa': 'http://identifiers.org/taxonomy/9823',
+            'Vitis vinifera': 'http://identifiers.org/taxonomy/29760',
+            'Xenopus tropicalis': 'http://identifiers.org/taxonomy/8364',
+            'Zea mays': 'http://identifiers.org/taxonomy/4577'
+    }
+
 
     def __init__(self, base_iri=None):
         if base_iri is None:
-            base_iri = 'http://www.wikipathways.org/wpi/webservicetest/'
+            base_iri = 'http://webservice.wikipathways.org/'
         self.base_iri = base_iri
 
         # define namespaces
@@ -123,7 +159,7 @@ class WikipathwaysApiClient(object):
         #kwargs.setdefault('allow_redirects', True)
 
         request_params = {'pwId' : identifier}
-        response = requests.get(self.base_iri + '?method=getPathwayInfo&format=xml', params=request_params)
+        response = requests.get(self.base_iri + 'getPathwayInfo', params=request_params)
         dom = ET.fromstring(response.text)
 
         info_api_terms = {}
@@ -145,11 +181,14 @@ class WikipathwaysApiClient(object):
         response = requests.get(self.base_iri + '?method=findPathwaysByText&format=xml', params=request_params)
         dom = ET.fromstring(response.text)
 
-        pathways_api_terms = {}
+        pathways = []
         for node in dom.findall('ns1:result', self.NAMESPACES):
+            pathway_using_api_terms = {}
             for child in node:
-                pathways_api_terms[ET.QName(child).localname] = child.text
-        pathways = self.__convert_api_terms_to_standard_terms(pathways_api_terms)
+                pathway_using_api_terms[ET.QName(child).localname] = child.text
+                #print pathways_api_terms
+            pathway = self.__convert_api_terms_to_standard_terms(pathway_using_api_terms)
+            pathways.append(pathway)
         return pathways
 
 
@@ -164,11 +203,21 @@ class WikipathwaysApiClient(object):
         response = requests.get(self.base_iri + '?method=findPathwaysByXref&format=xml', params=request_params)
         dom = ET.fromstring(response.text)
 
-        pathways_api_terms = {}
-        for node in dom.findall('ns1:result', self.NAMESPACES):
-            for child in node:
-                pathways_api_terms[ET.QName(child).localname] = child.text
-        pathways = self.__convert_api_terms_to_standard_terms(pathways_api_terms)
+        pathways = []
+        for resultNode in dom.findall('ns1:result', self.NAMESPACES):
+            pathway_using_api_terms = {}
+            pathway_using_api_terms['fields'] = []
+            for childNode in resultNode:
+                if ET.QName(childNode).localname != 'fields':
+                    pathway_using_api_terms[ET.QName(childNode).localname] = childNode.text
+                elif ET.QName(childNode).localname == 'fields':
+                    field = {}
+                    for fieldChildNode in childNode:
+                        #TODO standardize names & values from fieldChildNode.text
+                        field[ET.QName(fieldChildNode).localname] = fieldChildNode.text
+                    pathway_using_api_terms['fields'].append(field)
+            pathway = self.__convert_api_terms_to_standard_terms(pathway_using_api_terms)
+            pathways.append(pathway)
         return pathways
 
 
