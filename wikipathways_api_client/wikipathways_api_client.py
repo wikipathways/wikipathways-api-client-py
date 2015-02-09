@@ -9,6 +9,10 @@ class WikipathwaysApiClient(object):
     """
 
 
+    def invert_dict(dictionary):
+        return dict((v, k) for k, v in dictionary.iteritems())
+
+
     api_to_standard_term_mappings = {
         'id': 'identifier',
         'ids': 'identifiers',
@@ -22,15 +26,53 @@ class WikipathwaysApiClient(object):
         'codes': 'systemCodes'
     }
 
-    latinNameToIriMappings = {
+    english_name_to_iri_mappings = {
+            'African malaria mosquito': 'http://identifiers.org/taxonomy/7165',
+            'beet': 'http://identifiers.org/taxonomy/161934',
+            'thale cress': 'http://identifiers.org/taxonomy/3702',
+            'cattle': 'http://identifiers.org/taxonomy/9913',
+            'roundworm': 'http://identifiers.org/taxonomy/6239',
+            'dog': 'http://identifiers.org/taxonomy/9615',
+            'sea vase': 'http://identifiers.org/taxonomy/7719',
+            'zebrafish': 'http://identifiers.org/taxonomy/7955',
+            'fruit fly': 'http://identifiers.org/taxonomy/7227',
+            'Escherichia coli': 'http://identifiers.org/taxonomy/562',
+            'horse': 'http://identifiers.org/taxonomy/9796',
+            'chicken': 'http://identifiers.org/taxonomy/9031',
+            'soybean': 'http://identifiers.org/taxonomy/3847',
+            'human': 'http://identifiers.org/taxonomy/9606',
+            'barley': 'http://identifiers.org/taxonomy/4513',
+            'Rhesus monkey': 'http://identifiers.org/taxonomy/9544',
+            'mouse': 'http://identifiers.org/taxonomy/10090',
+            'platypus': 'http://identifiers.org/taxonomy/9258',
+            'long-grained rice': 'http://identifiers.org/taxonomy/39946',
+            'rice': 'http://identifiers.org/taxonomy/4530',
+            'black cottonwood': 'http://identifiers.org/taxonomy/3694',
+            'chimpanzee': 'http://identifiers.org/taxonomy/9598',
+            'Norway rat': 'http://identifiers.org/taxonomy/10116',
+            'baker\'s yeast': 'http://identifiers.org/taxonomy/4932',
+            'tomato': 'http://identifiers.org/taxonomy/4081',
+            'pig': 'http://identifiers.org/taxonomy/9823',
+            'wine grape': 'http://identifiers.org/taxonomy/29760',
+            'western clawed frog': 'http://identifiers.org/taxonomy/8364',
+            'maize': 'http://identifiers.org/taxonomy/4577'
+    }
+
+    iri_to_english_name_mappings = invert_dict(english_name_to_iri_mappings)
+
+
+    latin_name_to_iri_mappings = {
             'Anopheles gambiae': 'http://identifiers.org/taxonomy/7165',
             'Arabidopsis thaliana': 'http://identifiers.org/taxonomy/3702',
             'Aspergillus niger': 'http://identifiers.org/taxonomy/5061',
             'Bacillus subtilis': 'http://identifiers.org/taxonomy/1423',
+            'Beta vulgaris': 'http://identifiers.org/taxonomy/161934',
             'Bos taurus': 'http://identifiers.org/taxonomy/9913',
             'Caenorhabditis elegans': 'http://identifiers.org/taxonomy/6239',
             'Canis familiaris': 'http://identifiers.org/taxonomy/9615',
             'Ciona intestinalis': 'http://identifiers.org/taxonomy/7719',
+            'Ruminiclostridium thermocellum': 'http://identifiers.org/taxonomy/1515',
+            'Clostridium thermocellum': 'http://identifiers.org/taxonomy/1515',
             'Danio rerio': 'http://identifiers.org/taxonomy/7955',
             'Drosophila melanogaster': 'http://identifiers.org/taxonomy/7227',
             'Escherichia coli': 'http://identifiers.org/taxonomy/562',
@@ -103,6 +145,21 @@ class WikipathwaysApiClient(object):
         return output_object
 
 
+    def __convert_organism_string_to_dict(self, organism_string):
+        if hasattr(self, 'organism_dicts'):
+            organism_dicts = self.organism_dicts
+        else:
+            organism_dicts = self.organism_dicts = self.list_organisms()
+
+        for organism_dict in organism_dicts:
+            if organism_dict['@id'] == organism_string:
+                return organism_dict
+            elif organism_dict['name']['la'] == organism_string:
+                return organism_dict
+            elif organism_dict['name'].get('en') and organism_dict['name']['en'] == organism_string:
+                return organism_dict
+
+
     def create_pathway(self):
         ###
         # author: msk (mkutmon@gmail.com)
@@ -111,7 +168,7 @@ class WikipathwaysApiClient(object):
         # login
         pswd = getpass.getpass('Password:')
         auth = {'name' : username , 'pass' : pswd}
-        r_login = requests.get('http://test2.wikipathways.org/wpi/webservicetest/?method=login&format=xml', params=auth)
+        r_login = requests.get(self.base_iri + 'login', params=auth)
         dom = ET.fromstring(r_login.text)
 
         authentication = ''
@@ -124,7 +181,7 @@ class WikipathwaysApiClient(object):
 
         # create pathway
         update_params = {'auth' : username+'-'+authentication, 'gpml': gpml}
-        re = requests.post('http://test2.wikipathways.org/wpi/webservicetest/?method=createPathway&format=xml', params=update_params)
+        re = requests.post(self.base_iri + 'createPathway', params=update_params)
         print re.text
 
 
@@ -167,6 +224,10 @@ class WikipathwaysApiClient(object):
             for attribute in node:
                 info_api_terms[ET.QName(attribute).localname] = attribute.text
         info = self.__convert_api_terms_to_standard_terms(info_api_terms)
+
+        if info.get('organism') and isinstance(info['organism'], basestring):
+            info['organism'] = self.__convert_organism_string_to_dict(info['organism'])
+
         return info
 
 
@@ -178,7 +239,7 @@ class WikipathwaysApiClient(object):
         """
 
         request_params = self.__convert_standard_terms_to_api_terms(input_params)
-        response = requests.get(self.base_iri + '?method=findPathwaysByText&format=xml', params=request_params)
+        response = requests.get(self.base_iri + 'findPathwaysByText', params=request_params)
         dom = ET.fromstring(response.text)
 
         pathways = []
@@ -200,7 +261,7 @@ class WikipathwaysApiClient(object):
         """
 
         request_params = self.__convert_standard_terms_to_api_terms(input_params)
-        response = requests.get(self.base_iri + '?method=findPathwaysByXref&format=xml', params=request_params)
+        response = requests.get(self.base_iri + 'findPathwaysByXref', params=request_params)
         dom = ET.fromstring(response.text)
 
         pathways = []
@@ -222,14 +283,32 @@ class WikipathwaysApiClient(object):
 
 
     def list_organisms(self):
-        """Sends a GET request. Returns :list:`organisms` object, each an organism name as a string.
+        """Sends a GET request. Returns :list:`organisms` object, each an organism as a dict,
+        with the IRI, Latin name and English name (when available).
         """
         response = requests.get(self.base_iri + 'listOrganisms')
         dom = ET.fromstring(response.text)
 
         organisms = []
         for node in dom:
-            organisms.append(node.text)
+            organism = {}
+            organism['@context'] = [
+              {
+                'name': {
+                  '@id': 'biopax:name',
+                  '@container': '@language'
+                },
+                'Organism': 'http://identifiers.org/snomedct/410607006'
+              }
+            ]
+            organism['@type'] = 'Organism'
+            organism['name'] = {}
+            organism['name']['la'] = latin_name = node.text
+            organism['@id'] = self.latin_name_to_iri_mappings[latin_name]
+            english_name = self.iri_to_english_name_mappings.get(organism['@id'])
+            if english_name != None:
+                organism['name']['en'] = english_name
+            organisms.append(organism)
 
         return organisms
 

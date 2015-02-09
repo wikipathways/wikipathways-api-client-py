@@ -4,16 +4,16 @@ def main():
     wikipathways_api_client_instance = WikipathwaysApiClient()
 
     '''
+    '''
     # Get pathway info
     info = wikipathways_api_client_instance.get_pathway_info('WP274')
     print info
-    '''
 
-    '''
     '''
     # Get organisms
     organisms = wikipathways_api_client_instance.list_organisms()
     print organisms
+    '''
 
     '''
     # Get colored pathway
