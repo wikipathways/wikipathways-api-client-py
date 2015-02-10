@@ -28,6 +28,7 @@ def main():
     print file
     '''
 
+    '''
     # Get pathway with desired file format
     kwargs = {
         'identifier': 'WP2062',
@@ -37,7 +38,6 @@ def main():
     file = wikipathways_api_client_instance.get_pathway_as(**kwargs)
     print file
     '''
-    '''
 
     '''
     pathways_all = wikipathways_api_client_instance.list_pathways(organism = 'Homo sapiens')
@@ -46,18 +46,27 @@ def main():
 
     '''
     # findPathwaysByText
-    pathways_by_text = wikipathways_api_client_instance.find_pathways_by_text({
-            'query': 'apoptosis'
-        })
+    kwargs = {
+        'query': 'apoptosis',
+        'organism': 'http://identifiers.org/taxonomy/9606'
+    }
+    pathways_by_text = wikipathways_api_client_instance.find_pathways_by_text(**kwargs)
     print pathways_by_text 
     '''
 
     '''
     # findPathwaysByXref
-    pathways_by_xref = wikipathways_api_client_instance.find_pathways_by_xref({
-        'systemCodes': 'X',
-        'identifiers': '201746_at'
-    })
+    #kwargs = {
+    #    'system_codes': ['X', 'L'],
+    #    'identifiers': ['201746_at', '7040']
+    #}
+    kwargs = {
+        '@id': [
+            'http://identifiers.org/ncbigene/7040',
+            'http://identifiers.org/affy.probeset/201746_at'
+        ]
+    }
+    pathways_by_xref = wikipathways_api_client_instance.find_pathways_by_xref(**kwargs)
     print pathways_by_xref 
     '''
 

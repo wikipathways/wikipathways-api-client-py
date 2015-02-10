@@ -1,13 +1,8 @@
 # Python API client for WikiPathways webservices.
 
-Currently in development; the API for this library is unstable.
+The following API calls are supported. Feel free to make a pull request if
+you write code to support any of the other calls!
 
-## TODO
-- [ ] Add tests
-- [ ] Add documentation and build docs with PyDoc
-- [ ] Make into a package and publish on PyPI so it can be installed with ```pip```
-
-Also, the following webservice API calls still need to be implemented; pull requests welcome:
 - [x] listOrganisms
 - [x] listPathways
 - [x] getPathwayInfo
@@ -16,9 +11,9 @@ Also, the following webservice API calls still need to be implemented; pull requ
 - [ ] login
 - [x] getPathwayAs
 - [ ] updatePathway
-- [ ] createPathway
-- [ ] findPathwaysByText
-- [ ] findPathwaysByXref
+- [x] createPathway
+- [x] findPathwaysByText
+- [x] findPathwaysByXref
 - [ ] findInteractions
 - [ ] saveCurationTag
 - [ ] removeCurationTag
@@ -31,3 +26,9 @@ Also, the following webservice API calls still need to be implemented; pull requ
 - [ ] getOntologyTermsByOntology
 - [ ] getPathwaysByOntologyTerm
 - [ ] getPathwaysByParentOntologyTerm
+
+## Future Enhancements
+- [ ] Add tests
+- [ ] Add documentation and build docs with PyDoc
+- [ ] Make into a package and publish on PyPI so it can be installed with ```pip```
+

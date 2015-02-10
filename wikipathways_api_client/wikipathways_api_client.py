@@ -1,8 +1,9 @@
-import re
-import requests
+import base64
+import csv
 import getpass
 from lxml import etree as ET
-import base64
+import re
+import requests
 
 class WikipathwaysApiClient(object):
     """Returns :class:`WikipathwaysApiClient` object.
@@ -10,9 +11,46 @@ class WikipathwaysApiClient(object):
     """
 
 
-    def invert_dict(dictionary):
+    def __invert_dict(dictionary):
         return dict((v, k) for k, v in dictionary.iteritems())
 
+    def __get_bridgedb_datasets(self):
+        if hasattr(self, 'bridgedb_datasets'):
+            bridgedb_datasets = self.bridgedb_datasets
+        else:
+            bridgedb_datasets_request = requests.get('https://raw.githubusercontent.com/bridgedb/BridgeDb/master/org.bridgedb.bio/resources/org/bridgedb/bio/datasources.txt')
+            bridgedb_datasets_string = bridgedb_datasets_request.text
+            bridgedb_datasets_csv = csv.reader(bridgedb_datasets_string.split('\n'), delimiter='\t')
+            
+            bridgedb_datasets_parsed = [];
+            for bridgedb_dataset_csv in bridgedb_datasets_csv:
+                if bridgedb_dataset_csv:
+                    bridgedb_dataset_parsed = {}
+                    bridgedb_dataset_parsed['system_code'] = bridgedb_dataset_csv[1]
+                    bridgedb_dataset_parsed['miriam'] = bridgedb_dataset_csv[8]
+                    bridgedb_datasets_parsed.append(bridgedb_dataset_parsed)
+
+            self.bridgedb_datasets = bridgedb_datasets_parsed
+
+        return self.bridgedb_datasets
+
+    def __parse_identifiers_iri(self, iri):
+        iri_components = iri.split('identifiers.org')
+        iri_path = iri_components[len(iri_components) - 1]
+        iri_path_components = iri_path.split('/')
+        preferred_prefix = iri_path_components[1]
+        identifier = iri_path_components[2]
+
+        bridgedb_datasets = self.__get_bridgedb_datasets()
+        for bridgedb_dataset in bridgedb_datasets:
+            if 'urn:miriam:' + preferred_prefix == bridgedb_dataset['miriam']:
+                system_code = bridgedb_dataset['system_code']
+
+        return {
+            'preferred_prefix': preferred_prefix,
+            'identifier': identifier,
+            'system_code': system_code
+        }
 
     api_to_standard_term_mappings = {
         'id': 'identifier',
@@ -39,7 +77,8 @@ class WikipathwaysApiClient(object):
     }
     filename_extensions = filename_extension_to_media_type_mappings.keys()
     media_types = filename_extension_to_media_type_mappings.values()
-    media_type_to_filename_extension_mappings = invert_dict(filename_extension_to_media_type_mappings)
+    media_type_to_filename_extension_mappings = __invert_dict(filename_extension_to_media_type_mappings)
+
 
     english_name_to_iri_mappings = {
             'African malaria mosquito': 'http://identifiers.org/taxonomy/7165',
@@ -72,7 +111,7 @@ class WikipathwaysApiClient(object):
             'western clawed frog': 'http://identifiers.org/taxonomy/8364',
             'maize': 'http://identifiers.org/taxonomy/4577'
     }
-    iri_to_english_name_mappings = invert_dict(english_name_to_iri_mappings)
+    iri_to_english_name_mappings = __invert_dict(english_name_to_iri_mappings)
 
 
     latin_name_to_iri_mappings = {
@@ -159,26 +198,29 @@ class WikipathwaysApiClient(object):
         return output_object
 
 
-    def __convert_organism_string_to_dict(self, organism_string):
+    def __convert_organism_to_dict(self, organism):
         if hasattr(self, 'organism_dicts'):
             organism_dicts = self.organism_dicts
         else:
             organism_dicts = self.organism_dicts = self.list_organisms()
 
         for organism_dict in organism_dicts:
-            if organism_dict['@id'] == organism_string:
-                return organism_dict
-            elif organism_dict['name']['la'] == organism_string:
-                return organism_dict
-            elif organism_dict['name'].get('en') and organism_dict['name']['en'] == organism_string:
-                return organism_dict
+            if isinstance(organism, basestring):
+                if organism_dict['@id'] == organism:
+                    return organism_dict
+                elif organism_dict['name']['la'] == organism:
+                    return organism_dict
+                elif organism_dict['name'].get('en') and organism_dict['name']['en'] == organism:
+                    return organism_dict
+            elif organism.get('@id') and organism['@id'] == organism_dict['@id']:
+                    return organism_dict
 
 
     def __enrich_pathway(self, pathway):
         pathway['@id'] = 'http://identifiers.org/wikipathways/' + pathway['identifier']
 
         if pathway.get('organism') and isinstance(pathway['organism'], basestring):
-            pathway['organism'] = self.__convert_organism_string_to_dict(pathway['organism'])
+            pathway['organism'] = self.__convert_organism_to_dict(pathway['organism'])
 
         return pathway
 
@@ -209,7 +251,7 @@ class WikipathwaysApiClient(object):
 
 
     def get_colored_pathway(self, identifier, element_identifiers, colors, version = '0', file_format = 'svg'):
-        """Sends a GET request. Returns :string:`file` object.
+        """Sends a GET request. Returns file as string.
 
         Args:
           identifier (str): WikiPathways ID.
@@ -310,20 +352,18 @@ class WikipathwaysApiClient(object):
         dom = ET.fromstring(response.text)
         node = dom.find('ns1:data', self.NAMESPACES)
         response_string = base64.b64decode(node.text) ### decode this file
-        if request_params['fileType'] == 'gpml' or request_params['fileType'] == 'biopax' or request_params['fileType'] == 'svg':
+        if request_params['fileType'] == 'gpml' or request_params['fileType'] == 'owl' or request_params['fileType'] == 'svg':
             response = ET.fromstring(response_string)
         else:
             response = response_string
         return response
 
 
-    def get_pathway_info(self, identifier, **kwargs):
-        """Sends a GET request. Returns :dict:`info` object.
-        :param identifier: WikiPathways ID
-        :param \*\*kwargs: Optional arguments that ``get_pathway_info`` takes.
+    def get_pathway_info(self, identifier):
+        """Sends a GET request. Returns pathway metadata as dict.
+        Args:
+          identifier (str): WikiPathways ID.
         """
-
-        #kwargs.setdefault('allow_redirects', True)
 
         request_params = {'pwId' : identifier}
         response = requests.get(self.base_iri + 'getPathwayInfo', params=request_params)
@@ -339,12 +379,19 @@ class WikipathwaysApiClient(object):
         return pathway
 
 
-    def find_pathways_by_text(self, input_params):
-        """Sends a GET request. Returns list of dictionary references.
-        :param input_params
-        :param input_params['query']: Text to search for
-        :param [input_params['organism']]: Limit to organism with given name
+    def find_pathways_by_text(self, query, organism = None):
+        """Sends a GET request. Returns pathways as list of dicts.
+        Args:
+          query (str): Text to search for.
+          organism (str or dict, optional): Limit to organism with given name
+            (Latin or English) or @id (from http://identifiers.org/taxonomy/)
         """
+
+        input_params = {}
+        input_params['query'] = query
+
+        if organism:
+            input_params['organism'] = self.__convert_organism_to_dict(organism)['name']['la']
 
         request_params = self.__convert_standard_terms_to_api_terms(input_params)
         response = requests.get(self.base_iri + 'findPathwaysByText', params=request_params)
@@ -355,19 +402,36 @@ class WikipathwaysApiClient(object):
             pathway_using_api_terms = {}
             for child in node:
                 pathway_using_api_terms[ET.QName(child).localname] = child.text
-                #print pathways_using_api_terms
             pathway = self.__convert_api_terms_to_standard_terms(pathway_using_api_terms)
             pathway = self.__enrich_pathway(pathway)
             pathways.append(pathway)
         return pathways
 
 
-    def find_pathways_by_xref(self, input_params):
-        """Sends a GET request. Returns list of dictionary references.
-        :param input_params
-        :param input_params['systemCodes']: List of one or more BridgeDb system codes
-        :param [input_params['identifiers']]: List of one or more entity reference identifiers
+    def find_pathways_by_xref(self, **kwargs):
+        """Sends a GET request. Returns pathways as a list of dicts.
+            Required: either just @id or both system_codes and identifiers.
+        Args:
+          @id (list of str): One or more identifiers.org IRIs, like ['http://identifiers.org/ncbigene/7040'].
+          system_codes (list of str): One or more BridgeDb system codes.
+          identifiers (list of str): One or more entity reference identifiers.
         """
+
+        if kwargs.get('@id'):
+            if not isinstance(kwargs['@id'], list):
+                kwargs['@id'] = [kwargs['@id']]
+            system_codes = []
+            identifiers = []
+            for iri in kwargs['@id']:
+                identifiers_iri_components = self.__parse_identifiers_iri(iri)
+                system_codes.append(identifiers_iri_components['system_code'])
+                identifiers.append(identifiers_iri_components['identifier'])
+            input_params = {
+                'system_codes': system_codes,
+                'identifiers': identifiers
+            }
+        else:
+            input_params = kwargs
 
         request_params = self.__convert_standard_terms_to_api_terms(input_params)
         response = requests.get(self.base_iri + 'findPathwaysByXref', params=request_params)
