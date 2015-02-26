@@ -73,7 +73,7 @@ class WikipathwaysApiClient(object):
         'gpml': 'application/gpml+xml',
         'txt': 'text/vnd.genelist+tab-separated-values',
         'pwf': 'text/vnd.eu.gene+plain',
-        'owl': 'application/vnd.biopax.owl+xml',
+        'owl': 'application/vnd.biopax.rdf+xml',
     }
     filename_extensions = filename_extension_to_media_type_mappings.keys()
     media_types = filename_extension_to_media_type_mappings.values()
@@ -322,7 +322,7 @@ class WikipathwaysApiClient(object):
             * 'application/gpml+xml'
             * 'text/vnd.genelist+tab-separated-values'
             * 'text/vnd.eu.gene+plain'
-            * 'application/vnd.biopax.owl+xml'
+            * 'application/vnd.biopax.rdf+xml'
             * 'image/svg+xml'
             * 'image/png'
             * 'application/pdf'
@@ -352,11 +352,7 @@ class WikipathwaysApiClient(object):
         dom = ET.fromstring(response.text)
         node = dom.find('ns1:data', self.NAMESPACES)
         response_string = base64.b64decode(node.text) ### decode this file
-        if request_params['fileType'] == 'gpml' or request_params['fileType'] == 'owl' or request_params['fileType'] == 'svg':
-            response = ET.fromstring(response_string)
-        else:
-            response = response_string
-        return response
+        return response_string
 
 
     def get_pathway_info(self, identifier):
@@ -452,7 +448,11 @@ class WikipathwaysApiClient(object):
                     pathway_using_api_terms['fields'].append(field)
             pathway = self.__convert_api_terms_to_standard_terms(pathway_using_api_terms)
             pathway = self.__enrich_pathway(pathway)
-            pathways.append(pathway)
+            # TODO there appears to be a bug with the webservice such that it sometimes
+            # returns duplicate pathways. Remove this when the bug is fixed.
+            if not any(pathway['identifier'] == p['identifier'] for p in pathways):
+                pathways.append(pathway)
+            #pathways.append(pathway)
         return pathways
 
 
