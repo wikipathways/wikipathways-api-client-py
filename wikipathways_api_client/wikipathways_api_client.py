@@ -84,7 +84,7 @@ class WikipathwaysApiClient(object):
             'African malaria mosquito': 'http://identifiers.org/taxonomy/7165',
             'beet': 'http://identifiers.org/taxonomy/161934',
             'thale cress': 'http://identifiers.org/taxonomy/3702',
-            'cattle': 'http://identifiers.org/taxonomy/9913',
+            'cow': 'http://identifiers.org/taxonomy/9913',
             'roundworm': 'http://identifiers.org/taxonomy/6239',
             'dog': 'http://identifiers.org/taxonomy/9615',
             'sea vase': 'http://identifiers.org/taxonomy/7719',
