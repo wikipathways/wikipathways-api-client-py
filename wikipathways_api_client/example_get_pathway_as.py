@@ -7,7 +7,7 @@ def main():
     kwargs = {
         'identifier': 'WP2062',
         'version': 0,
-        'file_format': 'application/gpml+xml'
+        'file_format': 'application/vnd.gpml+xml'
     }
     file = wikipathways_api_client_instance.get_pathway_as(**kwargs)
     print file

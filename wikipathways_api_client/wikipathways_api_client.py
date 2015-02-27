@@ -70,7 +70,7 @@ class WikipathwaysApiClient(object):
         'svg': 'image/svg+xml',
         'png': 'image/png',
         'pdf': 'application/pdf',
-        'gpml': 'application/gpml+xml',
+        'gpml': 'application/vnd.gpml+xml',
         'txt': 'text/vnd.genelist+tab-separated-values',
         'pwf': 'text/vnd.eu.gene+plain',
         'owl': 'application/vnd.biopax.rdf+xml',
@@ -319,7 +319,7 @@ class WikipathwaysApiClient(object):
             Examples:
 
             Media types:
-            * 'application/gpml+xml'
+            * 'application/vnd.gpml+xml'
             * 'text/vnd.genelist+tab-separated-values'
             * 'text/vnd.eu.gene+plain'
             * 'application/vnd.biopax.rdf+xml'

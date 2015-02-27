@@ -12,8 +12,6 @@ from lxml import etree as ET
 # variables
 
 current_directory = os.path.dirname(os.path.realpath(__file__))
-print current_directory
-
 gpml_file = current_directory + '/test.gpml'
 wp_id = 'WP4'
 base_iri = 'http://pvjs.wikipathways.org/wpi/webservicetest/'
