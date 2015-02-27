@@ -13,7 +13,7 @@ from lxml import etree as ET
 username = 'Mkutmon'
 gpml_file = 'test.gpml'
 wp_id = 'WP4'
-basis_url = 'http://pvjs.wikipathways.org/wpi/webservicetest/'
+base_iri = 'http://pvjs.wikipathways.org/wpi/webservicetest/'
 description = 'test update webservice function'
 
 # update revision!!
@@ -27,7 +27,7 @@ namespaces = {'ns1':'http://www.wso2.org/php/xsd','ns2':'http://www.wikipathways
 # login
 password = getpass.getpass('Password:')
 auth = {'name' : username , 'pass' : password}
-r_login = requests.get(basis_url + 'login', params=auth)
+r_login = requests.get(base_iri + 'login', params=auth)
 dom = ET.fromstring(r_login.text)
 
 authentication = ''
@@ -40,4 +40,4 @@ gpml = f.read()
 
 # update pathway
 update_params = {'pwId': wp_id, 'description' : description, 'gpml' : gpml, 'revision' : revision, 'auth' : authentication, 'username': username}
-requests.post(basis_url + 'updatePathway', params=update_params)
+requests.post(base_iri + 'updatePathway', params=update_params)
