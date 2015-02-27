@@ -3,6 +3,7 @@
 # author: msk (mkutmon@gmail.com)
 ###
 
+import os
 import requests
 import getpass
 from lxml import etree as ET
@@ -10,8 +11,10 @@ from lxml import etree as ET
 ##################################
 # variables
 
-username = 'Ariutta'
-gpml_file = 'test.gpml'
+current_directory = os.path.dirname(os.path.realpath(__file__))
+print current_directory
+
+gpml_file = current_directory + '/test.gpml'
 wp_id = 'WP4'
 base_iri = 'http://pvjs.wikipathways.org/wpi/webservicetest/'
 description = 'test update webservice function'
@@ -25,10 +28,11 @@ revision = "78846"
 namespaces = {'ns1':'http://www.wso2.org/php/xsd','ns2':'http://www.wikipathways.org/webservice'}
 
 # login
+username = raw_input('Username: ')
 password = getpass.getpass('Password:')
 auth = {'name' : username , 'pass' : password}
-r_login = requests.get(base_iri + 'login', params=auth)
-dom = ET.fromstring(r_login.text)
+login_request = requests.get(base_iri + 'login', params=auth)
+dom = ET.fromstring(login_request.text)
 
 authentication = ''
 for node in dom.findall('ns1:auth', namespaces):
@@ -40,4 +44,5 @@ gpml = f.read()
 
 # update pathway
 update_params = {'pwId': wp_id, 'description' : description, 'gpml' : gpml, 'revision' : revision, 'auth' : authentication, 'username': username}
-requests.post(base_iri + 'updatePathway', params=update_params)
+update_pathway_request = requests.post(base_iri + 'updatePathway', params=update_params)
+print update_pathway_request.text
