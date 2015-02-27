@@ -10,7 +10,7 @@ from lxml import etree as ET
 ##################################
 # variables
 
-username = 'Mkutmon'
+username = 'Ariutta'
 gpml_file = 'test.gpml'
 wp_id = 'WP4'
 base_iri = 'http://pvjs.wikipathways.org/wpi/webservicetest/'
