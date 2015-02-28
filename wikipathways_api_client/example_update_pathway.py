@@ -18,7 +18,7 @@ base_iri = 'http://pvjs.wikipathways.org/wpi/webservicetest/'
 description = 'test update webservice function'
 
 # update revision!!
-revision = "78846"
+revision = "78853"
 
 ##################################
 
@@ -41,6 +41,9 @@ f = open(gpml_file, 'r')
 gpml = f.read()
 
 # update pathway
-update_params = {'pwId': wp_id, 'description' : description, 'gpml' : gpml, 'revision' : revision, 'auth' : authentication, 'username': username}
-update_pathway_request = requests.post(base_iri + 'updatePathway', params=update_params)
+update_params = {'pwId': wp_id, 'revision' : revision, 'auth' : authentication, 'username': username}
+update_data = {'description' : description, 'gpml' : gpml}
+update_pathway_request = requests.post(base_iri + 'updatePathway', params=update_params, data=update_data)
+print 'Completed with response:'
+print update_pathway_request.status_code
 print update_pathway_request.text
