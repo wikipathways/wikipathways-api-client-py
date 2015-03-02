@@ -17,7 +17,7 @@ wp_id = 'WP4'
 base_iri = 'http://pvjs.wikipathways.org/wpi/webservicetest/'
 description = 'test update webservice function'
 
-# update revision!!
+# current revision of the pathway! update always to the latest revision on the pathway page!
 revision = "78853"
 
 ##################################
