@@ -6,13 +6,19 @@ Install virtualenvwrapper. Then:
 
 ```bash
 mkvirtualenv myenv1
-pip install base64 csv getpass lxml re requests
+pip install -e .
 ```
 
 Once your virtualenv is created, you can come back to it with:
 
 ```bash
 workon myenv1
+```
+
+And leave it with:
+
+```bash
+deactivate
 ```
 
 To see a list of available virtualenvs:
