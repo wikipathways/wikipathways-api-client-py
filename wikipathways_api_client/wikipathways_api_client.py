@@ -308,8 +308,7 @@ class WikipathwaysApiClient(object):
 
     def get_pathway_as(self, identifier, version = '0', file_format = 'gpml'):
         """
-        Sends a GET request. Returns an LXML object for any XML media type
-        and a string for anything else
+        Sends a GET request. Returns a string.
 
         Args:
           identifier (str): WikiPathways ID.
@@ -349,6 +348,7 @@ class WikipathwaysApiClient(object):
 
         request_params = self.__convert_standard_terms_to_api_terms(input_params)
         response = requests.get(self.base_iri + 'getPathwayAs', params=request_params)
+
         dom = ET.fromstring(response.text)
         node = dom.find('ns1:data', self.NAMESPACES)
         response_string = base64.b64decode(node.text) ### decode this file
