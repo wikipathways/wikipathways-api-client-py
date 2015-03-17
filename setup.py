@@ -73,10 +73,10 @@ setup(
     # List additional groups of dependencies here (e.g. development dependencies).
     # You can install these using the following syntax, for example:
     # $ pip install -e .[dev,test]
-    #extras_require = {
-    #    'dev': ['check-manifest'],
-    #    'test': ['coverage'],
-    #},
+    extras_require = {
+        #'dev': ['check-manifest'],
+        'test': ['mock'],
+    },
 
     entry_points={
         'console_scripts': [
