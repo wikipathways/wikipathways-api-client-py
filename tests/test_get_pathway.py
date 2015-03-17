@@ -1,7 +1,7 @@
-import unittest
 from collections import namedtuple
 from mock import MagicMock
 from mock import patch
+import unittest
 from wikipathways_api_client import WikipathwaysApiClient
 
 class TestGetPathwayAs(unittest.TestCase):
