@@ -1,5 +1,28 @@
 # Python API client for WikiPathways webservices.
 
+## How to Use
+
+Install virtualenvwrapper. Then:
+
+```bash
+mkvirtualenv myenv1
+pip install base64 csv getpass lxml re requests
+```
+
+Once your virtualenv is created, you can come back to it with:
+
+```bash
+workon myenv1
+```
+
+To see a list of available virtualenvs:
+
+```bash
+ls $WORKON_HOME
+```
+
+## Supported API calls
+
 The following API calls are supported. Feel free to make a pull request if
 you write code to support any of the other calls!
 
