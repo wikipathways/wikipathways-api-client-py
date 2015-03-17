@@ -5,14 +5,14 @@
 Install virtualenvwrapper. Then:
 
 ```bash
-mkvirtualenv myenv1
+mkvirtualenv your_preferred_name
 pip install -e .
 ```
 
 Once your virtualenv is created, you can come back to it with:
 
 ```bash
-workon myenv1
+workon your_preferred_name
 ```
 
 And leave it with:
@@ -21,7 +21,7 @@ And leave it with:
 deactivate
 ```
 
-To see a list of available virtualenvs:
+To list your virtualenvs:
 
 ```bash
 ls $WORKON_HOME
@@ -59,5 +59,5 @@ you write code to support any of the other calls!
 ## Future Enhancements
 - [ ] Add tests
 - [ ] Add documentation and build docs with PyDoc
-- [ ] Make into a package and publish on PyPI so it can be installed with ```pip```
+- [ ] Publish on PyPI so it can be installed with ```pip```
 
