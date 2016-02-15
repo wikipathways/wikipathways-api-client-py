@@ -352,7 +352,7 @@ class WikipathwaysApiClient(object):
 
         dom = ET.fromstring(response.text)
         node = dom.find('ns1:data', self.NAMESPACES)
-        response_string = node.text ##base64.b64decode(node.text) ### decode this file
+        response_string = base64.b64decode(node.text) ### decode this file
         return response_string
 
 
