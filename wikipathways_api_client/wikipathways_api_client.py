@@ -144,6 +144,7 @@ class WikipathwaysApiClient(object):
             'Oryza sativa Indica Group': 'http://identifiers.org/taxonomy/39946',
             'Populus trichocarpa': 'http://identifiers.org/taxonomy/3694',
             'Pan troglodytes': 'http://identifiers.org/taxonomy/9598',
+	    'Plasmodium falciparum': 'http://identifiers.org/taxonomy/5833',
             'Rattus norvegicus': 'http://identifiers.org/taxonomy/10116',
             'Saccharomyces cerevisiae': 'http://identifiers.org/taxonomy/4932',
             'Solanum lycopersicum': 'http://identifiers.org/taxonomy/4081',
@@ -351,7 +352,7 @@ class WikipathwaysApiClient(object):
 
         dom = ET.fromstring(response.text)
         node = dom.find('ns1:data', self.NAMESPACES)
-        response_string = base64.b64decode(node.text) ### decode this file
+        response_string = node.text ##base64.b64decode(node.text) ### decode this file
         return response_string
 
 
