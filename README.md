@@ -27,7 +27,7 @@ Try one of the examples:
 python ./examples/example_get_pathway_as.py
 ```
 
-Now that your virtualenv is created, you can leave it whenever you like with:
+Now that your virtualenv is created, you can leave it at anytime with:
 
 ```bash
 deactivate
