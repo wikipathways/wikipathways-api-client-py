@@ -2,26 +2,44 @@
 
 ## How to Use
 
-Install virtualenvwrapper. Then:
+Clone and `cd` into this repo:
+
+```
+git clone https://github.com/wikipathways/wikipathways-api-client-py.git
+cd wikipathways-api-client-py
+```
+
+Install [virtualenvwrapper](https://virtualenvwrapper.readthedocs.org/en/latest/install.html) and create a new virtualenv:
 
 ```bash
 mkvirtualenv your_preferred_name
+```
+
+Install `wikipathways-api-client-py`:
+
+```
 pip install -e .
 ```
 
-Once your virtualenv is created, you can come back to it with:
+Try one of the examples:
 
-```bash
-workon your_preferred_name
+```
+python ./examples/example_get_pathway_as.py
 ```
 
-And leave it with:
+Now that your virtualenv is created, you can leave it whenever you like with:
 
 ```bash
 deactivate
 ```
 
-To list your virtualenvs:
+And come back to it later with:
+
+```bash
+workon your_preferred_name
+```
+
+To list all your virtualenvs:
 
 ```bash
 ls $WORKON_HOME
