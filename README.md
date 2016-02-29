@@ -54,6 +54,7 @@ sudo apt-get update
 sudo apt-get install aptitude
 sudo aptitude install libxslt1-dev libxml2-dev
 git clone https://github.com/wikipathways/wikipathways-api-client-py.git
+cd wikipathways-api-client-py
 pip install -e .
 python wikipathways-api-client-py/examples/example_get_pathway_as.py
 ```
