@@ -9,7 +9,7 @@ git clone https://github.com/wikipathways/wikipathways-api-client-py.git
 cd wikipathways-api-client-py
 ```
 
-Install [virtualenvwrapper](https://virtualenvwrapper.readthedocs.org/en/latest/install.html) and create a new virtualenv:
+Install [virtualenvwrapper](https://virtualenvwrapper.readthedocs.org/en/latest/install.html) and create a new virtualenv (if `pip` is available on your system, the virtualenvwrapper steps are optional):
 
 ```bash
 mkvirtualenv your_preferred_name
