@@ -45,6 +45,19 @@ To list all your virtualenvs:
 ls $WORKON_HOME
 ```
 
+## Troubleshooting
+
+This set of commands was required for one user to install on Linux:
+
+```
+sudo apt-get update
+sudo apt-get install aptitude
+sudo aptitude install libxslt1-dev libxml2-dev
+git clone https://github.com/wikipathways/wikipathways-api-client-py.git
+pip install -e .
+python wikipathways-api-client-py/examples/example_get_pathway_as.py
+```
+
 ## Supported API calls
 
 The following API calls are supported. Feel free to make a pull request if
