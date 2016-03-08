@@ -61,8 +61,7 @@ python wikipathways-api-client-py/examples/example_get_pathway_as.py
 
 ## Supported API calls
 
-The following API calls are supported. Feel free to make a pull request if
-you write code to support any of the other calls!
+If it's checked in the following list, the WikiPathways API call is implemented in this client. If it's not checked, we'd be happy to accept your pull request with code implementing it! You can find more details about the calls in the [WikiPathways API documentation](http://wikipathways.org/index.php/Help:WikiPathways_Webservice/API).
 
 - [x] listOrganisms
 - [x] listPathways
