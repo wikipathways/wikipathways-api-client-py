@@ -18,7 +18,7 @@ class WikipathwaysApiClient(object):
         if hasattr(self, 'bridgedb_datasets'):
             bridgedb_datasets = self.bridgedb_datasets
         else:
-            bridgedb_datasets_request = requests.get('https://raw.githubusercontent.com/bridgedb/BridgeDb/master/org.bridgedb.bio/resources/org/bridgedb/bio/datasources.txt')
+            bridgedb_datasets_request = requests.get('https://raw.githubusercontent.com/bridgedb/BridgeDb/master/org.bridgedb.bio/src/main/resources/org/bridgedb/bio/datasources.tsv')
             bridgedb_datasets_string = bridgedb_datasets_request.text
             bridgedb_datasets_csv = csv.reader(bridgedb_datasets_string.split('\n'), delimiter='\t')
             
